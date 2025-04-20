@@ -1,0 +1,153 @@
+# # version: '3.8'
+# # services:
+# #   api-server:
+# #     build:
+# #       context: .
+# #     container_name: kubesim-api-server
+# #     ports:
+# #       - "5000:5000"
+# #     volumes:
+# #       - /c/Users/prady/Downloads/kubernetes/kubesim/api_server:/app/api_server
+# #     working_dir: /app
+# #     command: python api_server/app.py
+# #     restart: always
+
+# #   node-1:
+# #     build:
+# #       context: .
+# #     container_name: node-1
+# #     environment:
+# #       - NODE_ID=node-1
+# #       - NODE_FILE=register_node_1.json
+# #       - SERVER_URL=http://api-server:5000
+# #     depends_on:
+# #       - api-server
+
+# #   node-2:
+# #     build:
+# #       context: .
+# #     container_name: node-2
+# #     environment:
+# #       - NODE_ID=node-2
+# #       - NODE_FILE=register_node_2.json
+# #       - SERVER_URL=http://api-server:5000
+# #     depends_on:
+# #       - api-server
+
+# #   node-3:
+# #     build:
+# #       context: .
+# #     container_name: node-3
+# #     environment:
+# #       - NODE_ID=node-3
+# #       - NODE_FILE=register_node_3.json
+# #       - SERVER_URL=http://api-server:5000
+# #     depends_on:
+# #       - api-server
+
+# version: '3.8'
+# services:
+#   api-server:
+#     build:
+#       context: .
+#     container_name: kubesim-api-server
+#     image: kubesim-api-server-image
+#     ports:
+#       - "5000:5000"
+#     volumes:
+#       - /c/Users/prady/Downloads/kubernetes/kubesim/api_server:/app/api_server
+#       - /var/run/docker.sock:/var/run/docker.sock
+#     environment:
+#       - PYTHONPATH=/app/api_server
+#     working_dir: /app/api_server
+#     command: python app.py
+#     restart: always
+#     healthcheck:
+#       test: ["CMD", "curl", "-f", "http://localhost:5000"] # change made here from localhost to api-server
+#       interval: 10s
+#       timeout: 10s
+#       retries: 5
+
+#   node-1:
+#     build:
+#       context: .
+#     container_name: node-1
+#     environment:
+#       - NODE_ID=node-1
+#       - NODE_FILE=register_node_1.json
+#       - SERVER_URL=http://api-server:5000
+#     depends_on:
+#       api-server:
+#         condition: service_healthy
+#           # - api-server
+
+#   # node-2:
+#   #   build:
+#   #     context: .
+#   #   container_name: node-2
+#   #   environment:
+#   #     - NODE_ID=node-2
+#   #     - NODE_FILE=register_node_2.json
+#   #     - SERVER_URL=http://api-server:5000
+#   #   depends_on:
+#   #     - api-server
+
+#   # node-3:
+#   #   build:
+#   #     context: .
+#   #   container_name: node-3
+#   #   environment:
+#   #     - NODE_ID=node-3
+#   #     - NODE_FILE=register_node_3.json
+#   #     - SERVER_URL=http://api-server:5000
+#   #   depends_on:
+#   #     - api-server
+
+version: '3.8'
+
+networks:
+  kubesim-net:
+    driver: bridge
+
+services:
+  api-server:
+    build:
+      context: ./api-server
+    container_name: kubesim-api-server
+    networks:
+      - kubesim-net
+    ports:
+      - "5000:5000"
+
+  node-1:
+    build:
+      context: ./node-simulator
+    container_name: node-1
+    networks:
+      - kubesim-net
+    environment:
+      - NODE_ID=node-1
+      - NODE_FILE=register_node_1.json
+      - SERVER_URL=http://api-server:5000
+
+  node-2:
+    build:
+      context: ./node-simulator
+    container_name: node-2
+    networks:
+      - kubesim-net
+    environment:
+      - NODE_ID=node-2
+      - NODE_FILE=register_node_2.json
+      - SERVER_URL=http://api-server:5000
+
+  node-3:
+    build:
+      context: ./node-simulator
+    container_name: node-3
+    networks:
+      - kubesim-net
+    environment:
+      - NODE_ID=node-3
+      - NODE_FILE=register_node_3.json
+      - SERVER_URL=http://api-server:5000

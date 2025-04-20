@@ -1,0 +1,5 @@
+# Prepare the JSON body (can be replaced with the contents of your file)
+$jsonBody = Get-Content -Raw -Path "C:\Users\prady\Downloads\kubernetes\KubeSim\node-simulator\heartbeat.json"
+
+# Send the POST request with appropriate headers
+Invoke-WebRequest -Uri http://localhost:5000/heartbeat -Method POST -Headers @{ "Content-Type" = "application/json" } -Body $jsonBody
